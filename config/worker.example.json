@@ -1,0 +1,17 @@
+{
+  "config_version": 2,
+  "auto_configured": false,
+  "server_url": "http://127.0.0.1:8015",
+  "node_id": "wechat-pc-01",
+  "display_name": "微信执行设备01",
+  "account_ref": "销售微信01",
+  "bootstrap_token": "远程连接中央端时填写一次性节点注册口令；本机连接可留空",
+  "node_token_encrypted": "",
+  "max_active_conversations": 500,
+  "scan_batch_size": 50,
+  "scan_interval_seconds": 0.8,
+  "cycle_pause_seconds": 1.0,
+  "uia_timeout_seconds": 8,
+  "state_file": "worker-state.json",
+  "log_file": "worker-events.jsonl"
+}

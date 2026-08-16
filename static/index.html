@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>榴莲销售运营智能体</title>
+  <link rel="stylesheet" href="/static/styles.css?v=20260719-provenance-training">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">榴</div>
+      <div><strong>榴莲销售智能体</strong><small>Sales Operations Agent</small></div>
+    </div>
+    <nav id="nav">
+      <button class="nav-item active" data-page="dashboard"><span>⌂</span>经营总览</button>
+      <button class="nav-item" data-page="leads"><span>◎</span>门店线索</button>
+      <button class="nav-item" data-page="wechat"><span>＋</span>微信获客</button>
+      <button class="nav-item" data-page="operations"><span>⌁</span>执行设备与客户</button>
+      <button class="nav-item" data-page="conversations"><span>◫</span>会话工作台</button>
+      <button class="nav-item" data-page="knowledge"><span>◇</span>知识库中心</button>
+      <button class="nav-item" data-page="commerce"><span>¥</span>商品与报价</button>
+      <button class="nav-item" data-page="inventory"><span>▤</span>进销存中心</button>
+      <button class="nav-item" data-page="orders"><span>▣</span>订单与发货</button>
+      <button class="nav-item" data-page="audit"><span>≡</span>审计日志</button>
+    </nav>
+    <div class="channel-status rpa"><i></i><div><b>RPA授权通道</b><small>Excel/CSV队列·自动添加·结果回写</small></div></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div><p class="eyebrow">榴莲 B2B 私域运营</p><h1 id="page-title">经营总览</h1></div>
+      <div class="top-actions"><span id="clock"></span><button class="icon-button" onclick="refreshCurrent()">↻</button><div class="avatar">管</div></div>
+    </header>
+
+    <section id="page-dashboard" class="page active">
+      <div class="metric-grid" id="metrics"></div>
+      <div class="grid two-one">
+        <article class="panel">
+          <div class="panel-head"><div><h2>客户转化漏斗</h2><p>从线索导入到成交履约的实时分布</p></div><span class="tag">实时</span></div>
+          <div id="funnel" class="funnel"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>今日行动建议</h2><p>根据当前任务自动整理</p></div></div>
+          <div id="action-suggestions" class="suggestions"></div>
+        </article>
+      </div>
+      <article class="panel">
+        <div class="panel-head"><div><h2>最近动态</h2><p>关键业务操作与系统事件</p></div></div>
+        <div id="recent-activity" class="timeline"></div>
+      </article>
+    </section>
+
+    <section id="page-leads" class="page">
+      <article class="panel">
+        <div class="toolbar">
+          <div class="search"><span>⌕</span><input id="lead-search" placeholder="搜索门店、联系人、手机号、微信号或地区"></div>
+          <select id="lead-status-filter"><option value="">全部状态</option><option>待触达</option><option>已触达</option><option>已建立联系</option><option>报价中</option><option>履约中</option><option>停止联系</option></select>
+          <label class="button secondary">导入 Excel / CSV<input type="file" id="csv-file" accept=".xlsx,.csv" hidden></label>
+          <button class="button primary" onclick="openFriendTaskDialog()">创建处理队列</button>
+        </div>
+        <div id="import-result" class="notice hidden"></div>
+        <div class="table-wrap"><table><thead><tr><th><input type="checkbox" id="select-all-leads"></th><th>门店</th><th>联系人</th><th>地区/类型</th><th>来源依据</th><th>评分</th><th>状态</th><th>负责人</th><th></th></tr></thead><tbody id="lead-rows"></tbody></table></div>
+      </article>
+    </section>
+
+    <section id="page-wechat" class="page">
+      <div class="page-intro"><div><h2>微信RPA控制台</h2><p>地区以Excel或CSV中每家门店的实际数据为准；自动搜索、填写验证语和地区备注，并回写添加结果</p></div><button class="button secondary" onclick="openAccountDialog()">新增执行账号</button></div>
+      <div id="account-cards" class="account-grid"></div>
+      <article class="panel rpa-console-panel">
+        <div class="panel-head"><div><h2>RPA队列控制</h2><p>每次仅运行一个队列，遇到安全验证或未知页面自动暂停</p></div><span id="rpa-job-status" class="badge gray">未启动</span></div>
+        <div class="rpa-console-grid">
+          <div class="rpa-controls">
+            <label>执行账号<select id="rpa-account"></select></label>
+            <label>任务间隔<select id="rpa-interval"><option value="8">8秒</option><option value="12">12秒</option><option value="20">20秒</option></select></label>
+            <button id="rpa-start-button" class="button primary" onclick="startRpaQueue()">启动RPA队列</button>
+            <button id="rpa-stop-button" class="button danger" onclick="stopRpaQueue()" disabled>停止队列</button>
+          </div>
+          <div class="rpa-progress-card">
+            <div class="quota-row"><span id="rpa-current-label">等待启动</span><b id="rpa-progress-text">0 / 0</b></div>
+            <div class="progress large"><i id="rpa-progress-bar" style="width:0%"></i></div>
+            <div class="rpa-stats"><span>成功 <b id="rpa-success-count">0</b></span><span>其他 <b id="rpa-failed-count">0</b></span><span>当前任务 <b id="rpa-current-task">-</b></span></div>
+            <p id="rpa-stop-reason" class="rpa-stop-reason hidden"></p>
+          </div>
+        </div>
+      </article>
+      <article class="panel workbench-panel">
+        <div class="panel-head"><div><h2>当前客户</h2><p>可单条执行RPA，便于正式启动队列前核对数据</p></div><span id="manual-progress" class="tag">0 / 0</span></div>
+        <div id="manual-workbench" class="manual-workbench"></div>
+      </article>
+      <article class="panel">
+        <div class="panel-head"><div><h2>执行与回写记录</h2><p>逐店记录CSV实际地区，以及申请已发送、添加成功、添加失败或暂停待处理</p></div><button class="button ghost" onclick="loadFriendTasks()">刷新</button></div>
+        <div class="table-wrap"><table><thead><tr><th>任务</th><th>门店</th><th>实际地区</th><th>执行账号</th><th>验证语 / 备注</th><th>添加结果</th><th>执行时间</th><th>结果说明</th><th>操作</th></tr></thead><tbody id="task-rows"></tbody></table></div>
+      </article>
+    </section>
+
+    <section id="page-operations" class="page">
+      <div class="page-intro"><div><h2>微信执行设备</h2><p>程序首次启动会自动识别并注册本机。单台设备默认管理500个客户会话，并按优先级分批检查新消息</p></div><button class="button secondary" onclick="loadOperations()">刷新状态</button></div>
+      <div id="operations-metrics" class="metric-grid operations-metrics"></div>
+      <div id="worker-node-cards" class="node-grid"></div>
+
+      <div class="grid operations-grid">
+        <article class="panel">
+          <div class="panel-head"><div><h2>绑定微信会话</h2><p>联系人显示名必须与微信聊天标题完全一致；绑定后节点才会监听和回复</p></div></div>
+          <form id="binding-form" class="binding-form" onsubmit="createChatBinding(event)">
+            <label>执行设备<select id="binding-node" required></select></label>
+            <label>系统会话<select id="binding-conversation" required></select></label>
+            <label>微信联系人显示名<input id="binding-contact" maxlength="64" required placeholder="例如：天使"></label>
+            <label class="check-label"><input id="binding-auto-reply" type="checkbox" checked> 自动生成并排队回复</label>
+            <button id="binding-submit" class="button primary" type="submit">建立绑定</button>
+          </form>
+          <p class="dialog-note">新绑定首次扫描只建立消息基线，不会回复此前已经存在的历史消息；之后只处理能够唯一识别的新消息。</p>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>部署原则</h2><p>不同电脑和多微信账号的运行边界</p></div></div>
+          <div class="deployment-rules">
+            <div><b>中央端</b><span>保存客户、知识库、DeepSeek配置、会话和审计记录</span></div>
+            <div><b>执行设备</b><span>首次启动自动注册；每个Windows交互桌面只操作本机当前登录的一个微信</span></div>
+            <div><b>大量客户</b><span>会话不再限制为20个；默认管理500个，采用分批轮询，消息发送任务始终优先执行</span></div>
+            <div><b>消息调度</b><span>客户会话分批轮询；待发送消息优先处理，同一微信窗口的操作严格串行</span></div>
+            <div><b>故障策略</b><span>断线、验证码、标题不唯一或发送未确认时停止该任务，不盲目重试</span></div>
+          </div>
+        </article>
+      </div>
+
+      <article class="panel">
+        <div class="panel-head"><div><h2>活跃会话</h2><p>自动回复、人工接管和最近收发状态</p></div></div>
+        <div class="table-wrap"><table><thead><tr><th>门店 / 微信联系人</th><th>节点 / 账号</th><th>模式</th><th>最近入站</th><th>最近出站</th><th>排队任务</th><th>异常</th><th>操作</th></tr></thead><tbody id="binding-rows"></tbody></table></div>
+      </article>
+      <div class="grid operations-grid">
+        <article class="panel">
+          <div class="panel-head"><div><h2>消息任务</h2><p>任务租约、发送确认和失败记录</p></div></div>
+          <div class="table-wrap compact-table"><table><thead><tr><th>ID</th><th>联系人</th><th>状态</th><th>尝试</th><th>时间</th><th>结果</th></tr></thead><tbody id="message-job-rows"></tbody></table></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>节点事件</h2><p>连接、扫描、排队和安全暂停</p></div></div>
+          <div id="worker-events" class="worker-events"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="page-conversations" class="page">
+      <div class="chat-layout panel">
+        <aside class="conversation-list"><div class="conversation-head"><h2>客户会话</h2><button class="icon-button" onclick="loadConversations()">↻</button></div><div id="conversation-items"></div></aside>
+        <div class="chat-main">
+          <div id="chat-empty" class="empty-state"><div>◫</div><h3>选择一个客户会话</h3><p>查看消息、生成回复建议并推进客户阶段</p></div>
+          <div id="chat-active" class="hidden chat-active">
+            <div class="chat-header"><div><h2 id="chat-name"></h2><p id="chat-meta"></p></div><div id="chat-badges"></div></div>
+            <div id="message-list" class="messages"></div>
+            <div id="suggestion-box" class="suggestion-box hidden"></div>
+            <div class="composer"><button class="button secondary" onclick="getSuggestion()">生成回复建议</button><textarea id="message-input" rows="2" placeholder="输入消息，Enter 发送，Shift+Enter 换行"></textarea><button class="button primary" onclick="sendChatMessage()">发送</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-knowledge" class="page">
+      <div class="page-intro"><div><h2>业务知识库</h2><p>事实、价格、运费、售后和自然话术统一管理；未知信息明确转人工</p></div><button class="button primary" onclick="openKnowledgeDialog()">新增知识</button></div>
+      <div id="knowledge-metrics" class="metric-grid knowledge-metrics"></div>
+
+      <div class="grid knowledge-top-grid">
+        <article class="panel ai-config-panel">
+          <div class="panel-head"><div><h2>DeepSeek连接</h2><p>密钥由Windows系统加密保存，模型只读取检索结果</p></div><span id="ai-status" class="badge gray">未配置</span></div>
+          <div class="ai-config-form">
+            <label>API地址<input id="ai-base-url" value="https://api.deepseek.com"></label>
+            <label>模型<select id="ai-model"><option value="deepseek-v4-flash">deepseek-v4-flash</option><option value="deepseek-v4-pro">deepseek-v4-pro</option></select></label>
+            <label class="wide">API Key<input id="ai-api-key" type="password" autocomplete="new-password" placeholder="输入后加密保存；留空表示不修改"></label>
+            <div class="ai-config-actions"><button class="button secondary" onclick="saveAiSettings()">保存配置</button><button class="button primary" onclick="testAiConnection()">测试连接</button></div>
+          </div>
+          <p id="ai-test-result" class="config-note">未配置API时，系统仍使用本地规则检索，不会编造答案。</p>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head"><div><h2>知识库问答测试</h2><p>展示答案依据、风险等级和是否必须转人工</p></div></div>
+          <textarea id="knowledge-question" class="knowledge-question" rows="4" placeholder="例如：黑刺AA 3.5-4斤发常规地区多少钱？"></textarea>
+          <div class="query-actions"><label class="switch-row"><input id="knowledge-use-ai" type="checkbox"> 使用DeepSeek组织语言</label><button class="button primary" onclick="askKnowledge()">生成建议</button></div>
+          <div id="knowledge-answer" class="knowledge-answer empty-answer">输入问题后查看检索结果</div>
+        </article>
+      </div>
+
+      <article class="panel">
+        <div class="panel-head"><div><h2>精确报价计算器</h2><p>仅使用启用中的价格和运费规则，不匹配时拒绝估价</p></div></div>
+        <div class="quote-calculator">
+          <label>销售方式<select id="kb-sale-mode" onchange="syncKnowledgePriceOptions()"><option>单粒</option><option>整箱</option></select></label>
+          <label>商品<select id="kb-product" onchange="syncKnowledgePriceOptions()"></select></label>
+          <label>等级<select id="kb-grade" onchange="syncKnowledgePriceOptions()"></select></label>
+          <label>规格<select id="kb-spec"></select></label>
+          <label>地区档位<select id="kb-region"><option>华南</option><option>常规</option><option>偏远</option></select></label>
+          <label>数量<input id="kb-quantity" type="number" min="1" value="1"></label>
+          <button class="button primary" onclick="calculateKnowledgePrice()">计算到手价</button>
+        </div>
+        <div id="kb-price-result" class="price-result hidden"></div>
+      </article>
+
+      <div class="grid knowledge-rules-grid">
+        <article class="panel"><div class="panel-head"><div><h2>售后边界</h2><p>所有赔付结论必须人工确认</p></div></div><div id="aftersales-rule-list" class="rule-list"></div></article>
+        <article class="panel"><div class="panel-head"><div><h2>当前运费</h2><p>省份范围未确认前必须手动选择档位</p></div></div><div id="freight-rule-list" class="rule-list"></div></article>
+      </div>
+
+      <article class="panel">
+        <div class="toolbar knowledge-toolbar">
+          <div class="search"><span>⌕</span><input id="knowledge-search" placeholder="搜索话术、规则或风险边界"></div>
+          <select id="knowledge-category"><option value="">全部分类</option></select>
+          <button class="button secondary" onclick="loadKnowledgeEntries()">搜索</button>
+        </div>
+        <div id="knowledge-entry-list" class="knowledge-entry-list"></div>
+      </article>
+    </section>
+
+    <section id="page-commerce" class="page">
+      <div class="page-intro"><div><h2>在售商品</h2><p>报价建议只读取当前商品、库存和价格数据</p></div><button class="button primary" onclick="openQuoteDialog()">新建报价</button></div>
+      <div id="product-cards" class="product-grid"></div>
+      <article class="panel">
+        <div class="panel-head"><div><h2>报价记录</h2><p>确认后可一键转为订单</p></div></div>
+        <div class="table-wrap"><table><thead><tr><th>报价编号</th><th>门店</th><th>商品</th><th>数量</th><th>单价</th><th>运费</th><th>总额</th><th>有效期</th><th>状态</th><th>操作</th></tr></thead><tbody id="quote-rows"></tbody></table></div>
+      </article>
+    </section>
+
+    <section id="page-inventory" class="page">
+      <div class="page-intro"><div><h2>一体化进销存</h2><p>采购、质检、批次、可售库存、销售占库和盘点流水使用同一套账</p></div><div class="page-actions"><button class="button secondary" onclick="openSupplierDialog()">新增供应商</button><button class="button secondary" onclick="openWarehouseDialog()">新增仓库</button><button class="button primary" onclick="openPurchaseOrderDialog()">新建采购单</button></div></div>
+      <div id="inventory-metrics" class="metric-grid inventory-metrics"></div>
+
+      <article class="panel">
+        <div class="panel-head"><div><h2>库存总览</h2><p>可售库存已经扣除生效占库；待质检、过期和拒收批次不会进入可售</p></div><button class="button secondary" onclick="openAdjustmentDialog()">提交盘点调整</button></div>
+        <div class="table-wrap"><table><thead><tr><th>商品 / SKU</th><th>仓库</th><th>可售现存</th><th>销售占用</th><th>可用库存</th><th>待质检</th><th>采购在途</th><th>补货点</th><th>预警</th></tr></thead><tbody id="inventory-rows"></tbody></table></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head"><div><h2>采购订单</h2><p>草稿审批后才能到货入库；允许分批到货</p></div></div>
+        <div class="table-wrap"><table><thead><tr><th>采购单</th><th>供应商</th><th>入库仓</th><th>商品</th><th>订购 / 到货</th><th>金额</th><th>预计到货</th><th>状态</th><th>操作</th></tr></thead><tbody id="purchase-order-rows"></tbody></table></div>
+      </article>
+
+      <div class="grid inventory-grid">
+        <article class="panel">
+          <div class="panel-head"><div><h2>批次与质检</h2><p>批次状态决定能否参与销售占库</p></div></div>
+          <div class="table-wrap inventory-scroll"><table><thead><tr><th>批次</th><th>商品</th><th>仓库</th><th>现存 / 占用</th><th>生产 / 到期</th><th>质检</th><th>操作</th></tr></thead><tbody id="inventory-batch-rows"></tbody></table></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>供应商与仓库</h2><p>采购归属和库存位置基础资料</p></div></div>
+          <div id="supply-master-data" class="master-data-list"></div>
+        </article>
+      </div>
+
+      <div class="grid inventory-grid">
+        <article class="panel">
+          <div class="panel-head"><div><h2>库存流水</h2><p>入库、出库和盘点只追加流水，不直接覆盖数量</p></div></div>
+          <div class="table-wrap inventory-scroll"><table><thead><tr><th>时间</th><th>商品 / 批次</th><th>仓库</th><th>类型</th><th>数量</th><th>业务依据</th></tr></thead><tbody id="inventory-movement-rows"></tbody></table></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h2>盘点调整审批</h2><p>调整申请审批后才产生库存流水</p></div></div>
+          <div class="table-wrap inventory-scroll"><table><thead><tr><th>调整单</th><th>商品 / 批次</th><th>数量</th><th>原因</th><th>状态</th><th>操作</th></tr></thead><tbody id="inventory-adjustment-rows"></tbody></table></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="page-orders" class="page">
+      <div id="fulfillment-metrics" class="metric-grid fulfillment-metrics"></div>
+      <article class="panel">
+        <div class="panel-head"><div><h2>销售订单履约</h2><p>收款、占库、拣货、部分发货和物流信息统一跟踪</p></div><button class="button secondary" onclick="loadOrders()">刷新</button></div>
+        <div class="table-wrap"><table><thead><tr><th>订单号 / 商品</th><th>门店</th><th>金额 / 支付</th><th>库存占用</th><th>履约进度</th><th>收货信息</th><th>最近物流</th><th>操作</th></tr></thead><tbody id="order-rows"></tbody></table></div>
+      </article>
+      <article class="panel">
+        <div class="panel-head"><div><h2>发货与物流控制</h2><p>每次发货对应批次扣减，可支持同一订单分批发货</p></div></div>
+        <div class="table-wrap"><table><thead><tr><th>发货单</th><th>销售订单 / 门店</th><th>仓库</th><th>数量</th><th>承运商 / 运单</th><th>状态</th><th>发货时间</th><th>操作</th></tr></thead><tbody id="shipment-rows"></tbody></table></div>
+      </article>
+    </section>
+
+    <section id="page-audit" class="page">
+      <article class="panel">
+        <div class="panel-head"><div><h2>操作审计</h2><p>记录线索、账号、会话、报价、订单和发货的关键动作</p></div><button class="button ghost" onclick="loadAudit()">刷新</button></div>
+        <div class="table-wrap"><table><thead><tr><th>时间</th><th>动作</th><th>对象</th><th>对象编号</th><th>详情</th></tr></thead><tbody id="audit-rows"></tbody></table></div>
+      </article>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <dialog id="friend-task-dialog">
+    <form method="dialog" onsubmit="createFriendTasks(event)"><div class="dialog-head"><div><h2>创建微信RPA队列</h2><p id="selected-lead-count"></p></div><button value="cancel" class="close">×</button></div>
+      <label>执行账号<select id="task-account" required></select></label>
+      <label>好友验证语<textarea id="task-greeting" rows="4">您好，我是榴莲产地供应链的销售，看到您在经营水果门店，想了解一下近期是否有榴莲采购计划？</textarea></label>
+      <label>微信备注<input id="task-remark" maxlength="32" value="榴莲客户-{地区}-{店名}"></label>
+      <div class="dialog-note">验证语最长50字符，备注最长32字符。可用变量：{店名}、{联系人}、{地区}。创建后仅进入待执行队列，不会立即操作微信。</div>
+      <div class="dialog-actions"><button value="cancel" class="button secondary">取消</button><button type="submit" class="button primary">创建任务</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="account-dialog"><form method="dialog" onsubmit="createAccount(event)"><div class="dialog-head"><div><h2>新增微信账号</h2><p>录入腾讯批准范围内的执行账号</p></div><button value="cancel" class="close">×</button></div>
+    <div class="form-grid"><label>账号名称<input id="account-nickname" required placeholder="例如：微信执行账号1"></label><label>微信号<input id="account-wechat" required></label><label>每日额度<input id="account-limit" type="number" min="1" max="150" value="150"></label><label>批准编号/说明<input id="account-approval" placeholder="批准材料编号"></label></div>
+    <div class="dialog-actions"><button value="cancel" class="button secondary">取消</button><button type="submit" class="button primary">保存账号</button></div></form></dialog>
+
+  <dialog id="knowledge-dialog"><form method="dialog" onsubmit="createKnowledgeEntry(event)"><div class="dialog-head"><div><h2>新增知识条目</h2><p>系统自动生成分类、风险和自动化标签，发布前可人工调整</p></div><button value="cancel" class="close">×</button></div>
+    <label>标题<input id="knowledge-title" required placeholder="例如：首次询价澄清"></label>
+    <label>分类<select id="knowledge-new-category"><option value="">自动识别</option><option>销售话术</option><option>商品事实</option><option>物流规则</option><option>售后规则</option><option>风险边界</option></select></label>
+    <label>内容<textarea id="knowledge-content" rows="6" required placeholder="输入真实业务内容，不确定的信息请明确写待确认"></textarea></label>
+    <label>发布状态<select id="knowledge-new-status"><option>待审核</option><option>已发布</option></select></label>
+    <div class="dialog-note">高风险内容会自动标记为“必须人工确认”。系统不会因为录入一条话术而自动向客户发送。</div>
+    <div class="dialog-actions"><button value="cancel" class="button secondary">取消</button><button type="submit" class="button primary">保存知识</button></div></form></dialog>
+
+  <dialog id="quote-dialog"><form method="dialog" onsubmit="createQuote(event)"><div class="dialog-head"><div><h2>新建报价</h2><p>报价创建后需确认再发送给客户</p></div><button value="cancel" class="close">×</button></div>
+    <div class="form-grid"><label>客户门店<select id="quote-lead" required></select></label><label>商品<select id="quote-product" required></select></label><label>数量<input id="quote-quantity" type="number" min="1" value="10" required></label><label>单价<input id="quote-price" type="number" min="0" step="0.01" required></label><label>运费<input id="quote-freight" type="number" min="0" step="0.01" value="0"></label><label>有效天数<input id="quote-valid-days" type="number" min="1" value="3"></label></div>
+    <div class="dialog-actions"><button value="cancel" class="button secondary">取消</button><button type="submit" class="button primary">生成报价</button></div></form></dialog>
+
+  <dialog id="order-dialog"><form method="dialog" onsubmit="createOrder(event)"><div class="dialog-head"><div><h2>报价转订单</h2><p id="order-quote-info"></p></div><button value="cancel" class="close">×</button></div>
+    <input id="order-quote-id" type="hidden"><div class="form-grid"><label>收货人<input id="order-receiver" required></label><label>联系电话<input id="order-phone" required></label><label class="wide">收货地址<input id="order-address" required></label><label>支付状态<select id="order-payment"><option>待付款</option><option>已付款</option></select></label></div>
+    <div class="dialog-actions"><button value="cancel" class="button secondary">取消</button><button type="submit" class="button primary">创建订单</button></div></form></dialog>
+
+  <dialog id="shipment-dialog"><form method="dialog" onsubmit="createShipment(event)"><div class="dialog-head"><div><h2>登记发货</h2><p id="shipment-order-info"></p></div><button value="cancel" class="close">×</button></div>
+    <input id="shipment-order-id" type="hidden"><div class="form-grid"><label>承运商<input id="shipment-carrier" value="顺丰冷运" required></label><label>运单号<input id="shipment-tracking" required></label><label>本次发货数量<input id="shipment-quantity" type="number" min="0.0001" step="0.0001" required></label><label>实际运费成本<input id="shipment-cost" type="number" min="0" step="0.01" value="0"></label></div>
+    <div class="dialog-note">系统按到期日优先自动核销已占用批次。确认后立即形成销售出库流水，不能通过修改订单状态撤销。</div>
+    <div class="dialog-actions"><button value="cancel" class="button secondary">取消</button><button type="submit" class="button primary">确认扣库并发货</button></div></form></dialog>
+
+  <dialog id="supplier-dialog"><form method="dialog" onsubmit="createSupplier(event)"><div class="dialog-head"><div><h2>新增供应商</h2><p>采购订单必须关联启用中的供应商</p></div><button value="cancel" class="close">×</button></div>
+    <div class="form-grid"><label>供应商名称<input id="supplier-name" required></label><label>供应商编码<input id="supplier-code" placeholder="留空自动生成"></label><label>联系人<input id="supplier-contact"></label><label>联系电话<input id="supplier-phone"></label><label>结算方式<input id="supplier-payment-terms" value="现款"></label><label>标准交期（天）<input id="supplier-lead-days" type="number" min="0" value="3"></label><label class="wide">备注<input id="supplier-notes"></label></div>
+    <div class="dialog-actions"><button value="cancel" class="button secondary">取消</button><button type="submit" class="button primary">保存供应商</button></div></form></dialog>
+
+  <dialog id="warehouse-dialog"><form method="dialog" onsubmit="createWarehouse(event)"><div class="dialog-head"><div><h2>新增仓库</h2><p>库存、占库和发货均按仓库隔离</p></div><button value="cancel" class="close">×</button></div>
+    <div class="form-grid"><label>仓库名称<input id="warehouse-name" required></label><label>仓库编码<input id="warehouse-code" placeholder="留空自动生成"></label><label class="wide">仓库地址<input id="warehouse-location"></label></div>
+    <div class="dialog-actions"><button value="cancel" class="button secondary">取消</button><button type="submit" class="button primary">保存仓库</button></div></form></dialog>
+
+  <dialog id="purchase-order-dialog"><form method="dialog" onsubmit="createPurchaseOrder(event)"><div class="dialog-head"><div><h2>新建采购单</h2><p>当前表单创建单商品采购单，后台数据结构支持多商品明细</p></div><button value="cancel" class="close">×</button></div>
+    <div class="form-grid"><label>供应商<select id="po-supplier" required></select></label><label>入库仓库<select id="po-warehouse" required></select></label><label>采购商品<select id="po-product" required></select></label><label>采购数量<input id="po-quantity" type="number" min="0.0001" step="0.0001" value="10" required></label><label>采购单价<input id="po-unit-cost" type="number" min="0.01" step="0.01" required></label><label>预计到货<input id="po-expected-at" type="date" required></label><label class="wide">采购备注<input id="po-notes" placeholder="产地、等级、包装或验收要求"></label></div>
+    <div class="dialog-note">保存后状态为草稿，必须审批后才能登记到货。</div>
+    <div class="dialog-actions"><button value="cancel" class="button secondary">取消</button><button type="submit" class="button primary">创建采购单</button></div></form></dialog>
+
+  <dialog id="purchase-receive-dialog"><form method="dialog" onsubmit="receivePurchaseOrder(event)"><div class="dialog-head"><div><h2>采购到货入库</h2><p id="purchase-receive-info"></p></div><button value="cancel" class="close">×</button></div>
+    <input id="receive-po-id" type="hidden"><div class="form-grid"><label class="wide">采购明细<select id="receive-item" required></select></label><label>本次到货数量<input id="receive-quantity" type="number" min="0.0001" step="0.0001" required></label><label>批次号<input id="receive-batch-no" required></label><label>生产日期<input id="receive-production-date" type="date"></label><label>到期日期<input id="receive-expiry-date" type="date"></label></div>
+    <div class="dialog-note">到货一律进入“待质检”区，不参与销售占库。完成独立质检并放行后才进入可售库存。</div>
+    <div class="dialog-actions"><button value="cancel" class="button secondary">取消</button><button type="submit" class="button primary">确认到货入库</button></div></form></dialog>
+
+  <dialog id="adjustment-dialog"><form method="dialog" onsubmit="createInventoryAdjustment(event)"><div class="dialog-head"><div><h2>提交盘点调整</h2><p>申请和审批分离，审批后才改变账面库存</p></div><button value="cancel" class="close">×</button></div>
+    <div class="form-grid"><label>商品<select id="adjustment-product" required onchange="syncAdjustmentBatches()"></select></label><label>仓库<select id="adjustment-warehouse" required onchange="syncAdjustmentBatches()"></select></label><label class="wide">批次<select id="adjustment-batch"><option value="">盘盈新增批次（仅正数）</option></select></label><label>调整数量<input id="adjustment-quantity" type="number" step="0.0001" required placeholder="盘盈为正，盘亏为负"></label><label>原因<input id="adjustment-reason" required placeholder="盘点差异、破损、报废等"></label></div>
+    <div class="dialog-note">减少库存必须选择具体批次；系统禁止调整后出现负库存或侵占已经锁定的销售库存。</div>
+    <div class="dialog-actions"><button value="cancel" class="button secondary">取消</button><button type="submit" class="button primary">提交审批</button></div></form></dialog>
+
+  <script src="/static/app.js?v=20260719-region-150"></script>
+</body>
+</html>

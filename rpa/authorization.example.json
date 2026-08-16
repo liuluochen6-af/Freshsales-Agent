@@ -1,0 +1,21 @@
+{
+  "authorization_holder": "请填写实际授权主体",
+  "company": "请填写实际使用单位",
+  "platform": "微信 Windows 客户端",
+  "allowed_actions": [
+    "rpa_launch_weixin",
+    "read_contact_from_csv",
+    "search_contact",
+    "fill_friend_request_greeting",
+    "submit_friend_request",
+    "send_message_to_existing_contact",
+    "read_result",
+    "write_result_to_system"
+  ],
+  "daily_limit": 30,
+  "minimum_interval_seconds": 5,
+  "fail_closed": true,
+  "captcha_action": "pause_for_human",
+  "risk_prompt_action": "pause_for_human",
+  "document_storage": "授权材料应在项目外安全保存"
+}
