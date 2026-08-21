@@ -2,7 +2,6 @@
 
 > 面向榴莲及生鲜批发业务的本地化销售运营智能体：从门店线索、微信触达、知识库问答，到报价、采购、库存、订单和发货的一体化开源工作台。
 
-当前公开版本：`0.2.0-alpha`
 
 **Web 系统demo：** [Freshsales-Agent](https://freshsales-agent.liuluochen6.chatgpt.site)  
 支持公开市场数据、企业 CSV 导入，以及报价、库存、履约、售后与合规 Agent 路由。
