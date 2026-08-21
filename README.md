@@ -63,9 +63,48 @@ flowchart LR
     API --> DB[(SQLite)]
     API --> KB[知识库与业务规则]
     API --> DS[DeepSeek API 可选]
+    API --> INTEL[销售多 Agent 编排与动态 Skills]
+    INTEL -.影子或低风险激活.-> EM[EchoMind 可选]
     W[Windows 微信执行设备] <-->|会话、消息任务、回执| API
     W <-->|UI Automation| WX[已登录的微信客户端]
     API --> INV[采购、库存、订单、发货]
+```
+
+### EchoMind 智能决策层
+
+中央端内置了面向销售流程的结构化多 Agent 路由，包括线索培育、商品咨询、报价、库存、订单、履约物流、售后和合规 Agent。每次建议回复都会返回：
+
+- `intent`、`intent_group` 和抽取出的数量、商品、订单号等实体；
+- `primary_agent`、`supporting_agents`、路由原因和置信度；
+- 风险等级、是否需要人工接管以及建议执行的业务动作；
+- 本轮匹配的 `skills/*/SKILL.md` 业务规范。
+
+业务事实和执行权限仍由 DurianFlow 掌握。Agent 只能提出动作建议，不能直接修改价格、库存、订单、联系人授权或微信发送队列。
+
+也可以连接独立部署的 EchoMind `/chat` 服务：
+
+```powershell
+$env:ECHOMIND_URL = "http://127.0.0.1:8000"
+$env:ECHOMIND_MODE = "shadow"
+$env:ECHOMIND_TIMEOUT_SECONDS = "8"
+python app.py
+```
+
+接入模式：
+
+| 模式 | 行为 |
+| --- | --- |
+| `off` | 默认值，不调用远程 EchoMind |
+| `shadow` | 调用 EchoMind 并记录路由元数据，回复仍使用现有安全链路 |
+| `active` | 仅在普通寒暄等低风险沟通中，且通过 SalesFlow 二次校验后采用 EchoMind 回复 |
+
+退款赔偿、隐私争议、停止联系、合同账期及其他需要人工确认的消息不会发送给远程 EchoMind。远程服务超时、不可用或返回异常时，会自动使用原有本地知识库流程。
+
+运行后可查看智能层状态：
+
+```text
+GET /api/intelligence/status
+POST /api/intelligence/skills/reload
 ```
 
 中央端保存全部业务状态；执行设备只操作本机已经登录的微信。GPT、Codex 或本项目开发环境不参与正式运行。配置 DeepSeek 后，生产消息链路是：
@@ -150,8 +189,8 @@ durianflow-agent/
 ### 1. 下载代码
 
 ```powershell
-git clone https://github.com/linbiaoand3friend/durianflow-agent.git
-cd durianflow-agent
+git clone https://github.com/liuluochen6-af/selfsale-agent.git
+cd selfsale-agent
 ```
 
 也可以在 GitHub 页面点击 `Code → Download ZIP`，解压后进入项目目录。

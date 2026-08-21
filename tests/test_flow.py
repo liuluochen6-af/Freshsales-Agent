@@ -47,6 +47,9 @@ class AgentFlowTest(unittest.TestCase):
         suggestion = self.client.post(f"/api/conversations/{conversation_id}/suggest")
         self.assertTrue(suggestion.json["suggestion"])
         self.assertNotIn("680", suggestion.json["suggestion"])
+        self.assertEqual(suggestion.json["routing"]["primary_agent"], "quotation_agent")
+        self.assertIn("product_agent", suggestion.json["routing"]["supporting_agents"])
+        self.assertIn("报价信息收集规范", suggestion.json["matched_skills"])
 
         quote = self.client.post("/api/quotes", json={
             "lead_id": 1, "product_id": 2, "quantity": 10, "unit_price": 680, "freight": 120

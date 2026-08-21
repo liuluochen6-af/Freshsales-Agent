@@ -7,8 +7,12 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
-from pywinauto import Desktop
-from pywinauto.base_wrapper import BaseWrapper
+try:
+    from pywinauto import Desktop
+    from pywinauto.base_wrapper import BaseWrapper
+except ImportError:  # Central services and unit tests may run outside Windows.
+    Desktop = None
+    BaseWrapper = object
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -106,6 +110,8 @@ def classify_search_result(target: str, texts: list[str], buttons: list[str]) ->
 
 class WeixinDriver:
     def __init__(self, timeout: float = 8.0):
+        if Desktop is None:
+            raise RPAError("微信RPA只能在已安装pywinauto的Windows执行设备上运行")
         self.timeout = timeout
         self.authorization = load_authorization()
         self.desktop = Desktop(backend="uia")
