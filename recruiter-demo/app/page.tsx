@@ -281,7 +281,7 @@ export default function Home() {
             </a>
             <a
               className="secondary"
-              href="https://github.com/liuluochen6-af/selfsale-agent"
+              href="https://github.com/liuluochen6-af/Freshsales-Agent"
               target="_blank"
               rel="noreferrer"
             >
@@ -642,7 +642,7 @@ export default function Home() {
         </a>
         <p>Multi-Agent Sales Intelligence OS · Production operations console</p>
         <a
-          href="https://github.com/liuluochen6-af/selfsale-agent"
+          href="https://github.com/liuluochen6-af/Freshsales-Agent"
           target="_blank"
           rel="noreferrer"
         >
