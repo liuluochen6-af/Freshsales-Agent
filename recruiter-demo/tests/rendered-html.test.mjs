@@ -11,7 +11,7 @@ async function render() {
   }, { waitUntil() {}, passThroughOnException() {} });
 }
 
-test("server-renders the Freshsales-Agent recruiter demo", async () => {
+test("server-renders the Freshsales-Agent operations console", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
@@ -21,8 +21,8 @@ test("server-renders the Freshsales-Agent recruiter demo", async () => {
   assert.match(html, /8 个专职角色/);
   assert.match(html, /真实公开数据/);
   assert.match(html, /Bank of Thailand/);
-  assert.match(html, /不连接真实客户系统/);
-  assert.doesNotMatch(html, /DurianFlow|Your site is taking shape/);
+  assert.match(html, /支持企业 CSV 导入/);
+  assert.doesNotMatch(html, /DurianFlow|Your site is taking shape|演示|demo|recruiter/i);
 });
 
 test("ships interactive routing and safety cases", async () => {
@@ -35,4 +35,9 @@ test("ships interactive routing and safety cases", async () => {
   assert.match(page, /Freshsales-Agent Console/);
   assert.match(page, /setSelectedAgent/);
   assert.match(page, /下载 CSV/);
+  assert.match(page, /导入 CSV/);
+  assert.match(page, /href="\/app"/);
+  const appRoute = await readFile(new URL("../app/app/page.tsx", import.meta.url), "utf8");
+  assert.match(appRoute, /OperationsApp/);
+  assert.match(appRoute, /运营控制台/);
 });

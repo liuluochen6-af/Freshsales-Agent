@@ -1,2 +1,181 @@
-.agentRail button.agent{width:100%;border:0;background:transparent;text-align:left;cursor:pointer}.agentRail button.agent:hover{background:#f1effc;color:var(--purple)}.agentRail button.agent.active{background:#fff}.agentSelect{display:none}.agentDataset{margin-top:22px;border:1px solid var(--line);border-radius:13px;overflow:hidden}.datasetHead{display:flex;justify-content:space-between;gap:24px;padding:18px 20px;background:#fbfbfd;border-bottom:1px solid var(--line)}.datasetHead>div:first-child>span{display:inline-block;background:#eeebff;color:var(--purple);border-radius:99px;padding:5px 8px;font-size:8px;font-weight:800;letter-spacing:.6px}.datasetHead p{font-size:11px;color:#667085;line-height:1.6;margin:8px 0 0;max-width:560px}.dataActions{display:flex;align-items:flex-start;gap:7px;flex-shrink:0}.dataActions a{font-size:8px;font-weight:750;color:var(--purple);border:1px solid #dcd6fb;background:#fff;padding:7px 9px;border-radius:7px}.tableScroll{overflow-x:auto}.agentDataset table{width:100%;border-collapse:collapse;font-size:10px}.agentDataset th,.agentDataset td{text-align:left;padding:11px 16px;border-bottom:1px solid #eef0f3;white-space:nowrap}.agentDataset th{background:#f8f9fb;color:#667085;font-size:8px;text-transform:uppercase;letter-spacing:.6px}.agentDataset tbody tr:last-child td{border-bottom:0}.agentDataset tbody tr:hover{background:#faf9ff}.sourceNote{display:block;padding:11px 16px;background:#fbfbfd;color:#98a2b3;font-size:8px;border-top:1px solid var(--line)}.routeDivider{display:flex;align-items:center;gap:12px;margin-top:25px;color:#98a2b3;font-size:8px;letter-spacing:1px;text-transform:uppercase}.routeDivider:after{content:"";height:1px;flex:1;background:var(--line)}
-@media(max-width:900px){.agentSelect{display:flex;align-items:center;justify-content:space-between;margin:18px 0 0;padding:11px 13px;border:1px solid var(--line);border-radius:9px}.agentSelect span{font-size:10px;color:#667085}.agentSelect select{border:0;background:transparent;color:var(--purple);font-weight:750;outline:0}.datasetHead{align-items:flex-start;flex-direction:column}.dataActions{flex-wrap:wrap}.agentDataset th,.agentDataset td{padding:10px 12px}}
+.siteExperience > .workspaceSection { display: none; }
+.agentRail button.agent {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.agentRail button.agent:hover {
+  background: #f1effc;
+  color: var(--purple);
+}
+.agentRail button.agent.active {
+  background: #fff;
+}
+.agentSelect {
+  display: none;
+}
+.agentDataset {
+  margin-top: 22px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  overflow: hidden;
+}
+.datasetHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 20px;
+  background: #fbfbfd;
+  border-bottom: 1px solid var(--line);
+}
+.datasetHead > div:first-child > span {
+  display: inline-block;
+  background: #eeebff;
+  color: var(--purple);
+  border-radius: 99px;
+  padding: 5px 8px;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+}
+.datasetHead p {
+  font-size: 11px;
+  color: #667085;
+  line-height: 1.6;
+  margin: 8px 0 0;
+  max-width: 560px;
+}
+.dataActions {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  flex-shrink: 0;
+}
+.dataActions a,
+.dataActions button {
+  font-size: 8px;
+  font-weight: 750;
+  color: var(--purple);
+  border: 1px solid #dcd6fb;
+  background: #fff;
+  padding: 7px 9px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.emptyData {
+  text-align: center !important;
+  color: #98a2b3;
+  padding: 28px !important;
+}
+.tableScroll {
+  overflow-x: auto;
+}
+.agentDataset table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+.agentDataset th,
+.agentDataset td {
+  text-align: left;
+  padding: 11px 16px;
+  border-bottom: 1px solid #eef0f3;
+  white-space: nowrap;
+}
+.agentDataset th {
+  background: #f8f9fb;
+  color: #667085;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.agentDataset tbody tr:last-child td {
+  border-bottom: 0;
+}
+.agentDataset tbody tr:hover {
+  background: #faf9ff;
+}
+.sourceNote {
+  display: block;
+  padding: 11px 16px;
+  background: #fbfbfd;
+  color: #98a2b3;
+  font-size: 8px;
+  border-top: 1px solid var(--line);
+}
+.routeDivider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 25px;
+  color: #98a2b3;
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.routeDivider:after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--line);
+}
+@media (max-width: 900px) {
+  .agentSelect {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 18px 0 0;
+    padding: 11px 13px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+  }
+  .agentSelect span {
+    font-size: 10px;
+    color: #667085;
+  }
+  .agentSelect select {
+    border: 0;
+    background: transparent;
+    color: var(--purple);
+    font-weight: 750;
+    outline: 0;
+  }
+  .datasetHead {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .dataActions {
+    flex-wrap: wrap;
+  }
+  .agentDataset th,
+  .agentDataset td {
+    padding: 10px 12px;
+  }
+}
+
+.appRoute .siteOnly,
+.appRoute .nav,
+.appRoute .hero,
+.appRoute .proof,
+.appRoute .features,
+.appRoute .architecture,
+.appRoute .cta,
+.appRoute footer {
+  display: none;
+}
+.appRoute .workspaceSection {
+  display: block;
+  min-height: 100vh;
+  padding: 40px 0;
+}
+.appRoute .workspaceIntro {
+  margin-bottom: 24px;
+}
+.appRoute .workspaceIntro h2 {
+  font-size: 34px;
+}
+@media (max-width: 600px) {
+  .appRoute .workspaceSection { padding: 18px 0; }
+}

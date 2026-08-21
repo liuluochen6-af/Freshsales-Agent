@@ -4,8 +4,8 @@
 
 当前公开版本：`0.2.0-alpha`
 
-**在线演示：** [Freshsales-Agent Recruiter Demo](https://freshsales-agent-demo.liuluochen6.chatgpt.site)  
-无需登录，使用虚构数据，可直接测试报价、库存、履约、售后与合规 Agent 路由。
+**Web 运营系统：** [Freshsales-Agent](https://freshsales-agent.liuluochen6.chatgpt.site)  
+支持公开市场数据、企业 CSV 导入，以及报价、库存、履约、售后与合规 Agent 路由。
 
 Freshsales-Agent 不是一个只会生成销售话术的聊天机器人。它把线索管理、Windows 微信 RPA、可追溯知识库、DeepSeek 语言组织、销售订单、批次库存和发货控制放在同一套本地系统中，目标是让小型供应链团队能够看清每个客户、每条消息、每次报价和每一笔库存变化。
 
