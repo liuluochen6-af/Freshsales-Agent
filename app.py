@@ -25,6 +25,7 @@ from openpyxl import load_workbook
 from openpyxl.utils.exceptions import InvalidFileException
 
 from knowledge_seed import seed_knowledge
+from intelligence import EchoMindClient, SalesAgentOrchestrator, SkillManager
 from inventory import (
     INVENTORY_SCHEMA,
     InventoryError,
@@ -51,6 +52,10 @@ app = Flask(__name__, static_folder="static", static_url_path="/static")
 app.config["JSON_AS_ASCII"] = False
 app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
+
+SALES_ORCHESTRATOR = SalesAgentOrchestrator()
+SALES_SKILLS = SkillManager(BASE_DIR / "skills")
+ECHOMIND_CLIENT = EchoMindClient.from_env()
 
 
 @app.after_request
@@ -544,6 +549,24 @@ def contextual_reply_has_unsupported_fact(text: str) -> bool:
 def reply_contains_false_human_claim(text: str) -> bool:
     forbidden = ("我是真人", "我不是机器人", "本人纯手工回复", "全程人工本人", "真人一对一回复")
     return any(term in (text or "") for term in forbidden)
+
+
+def external_reply_is_safe(text: str) -> bool:
+    """Allow remote text only when it is short, complete, and claim-free."""
+    candidate = (text or "").strip()
+    if not candidate or len(candidate) > 500:
+        return False
+    if reply_contains_false_human_claim(candidate) or contextual_reply_has_unsupported_fact(candidate):
+        return False
+    high_risk_claims = (
+        "已退款", "同意退款", "同意赔偿", "已经赔付", "库存充足", "已经发货",
+        "已付款", "合同已确认", "可以月结", "保证到达", "保证品质",
+    )
+    unsupported_fact_terms = (
+        "价格", "报价", "运费", "库存", "现货", "发货", "物流", "到货", "产地",
+        "退款", "赔偿", "赔付", "合同", "账期", "付款", "订单", "发票", "资质",
+    )
+    return not any(term in candidate for term in (*high_risk_claims, *unsupported_fact_terms))
 
 
 def knowledge_risk_level(matches: list[dict[str, Any]], requires_human: bool) -> str:
@@ -2058,6 +2081,8 @@ def suggest_reply(conversation_id: int):
         customer_messages = [row["content"] for row in history_rows if row["sender"] == "customer"]
         message = customer_messages[-1] if customer_messages else "您好"
         history = "\n".join(("客户" if row["sender"] == "customer" else "销售") + "：" + row["content"] for row in history_rows)
+        routing = SALES_ORCHESTRATOR.route(message, (row["content"] for row in history_rows))
+        skill_context, matched_skills = SALES_SKILLS.render(routing.agent_types, message)
         retrieval_query = "\n".join(row["content"] for row in history_rows)
         matches = search_knowledge_rows(conn, retrieval_query, "", 12)
         context, _, history_sources = build_answer_context(conn, retrieval_query, matches)
@@ -2090,7 +2115,7 @@ def suggest_reply(conversation_id: int):
             requires_human = False if automation_identity and not (source_denied or privacy_complaint or stop_request) else True
             knowledge_hit = True
         suggestion, decision_basis = local_knowledge_answer(conn, message, current_matches, history, conv)
-        requires_human = requires_human or decision_requires_human(decision_basis)
+        requires_human = requires_human or decision_requires_human(decision_basis) or routing.requires_human
         risk = knowledge_risk_level(current_matches, requires_human)
         if source_question and not (source_denied or privacy_complaint or stop_request):
             risk = "中"
@@ -2117,6 +2142,9 @@ def suggest_reply(conversation_id: int):
                 "不得使用保证新鲜、保证每颗品质一致、绝对没有问题等无法核验的承诺。"
                 "退款赔偿只解释规则并说明需人工核实，但仍可继续普通沟通。\n"
                 "如果客户直接询问是否机器人、AI、真人或自动回复，必须如实说明账号由公司销售人员和服务系统共同维护，不得声称自己是真人或不是机器人。\n"
+                f"当前智能路由：intent={routing.intent}，primary_agent={routing.primary_agent}，"
+                f"supporting_agents={','.join(routing.supporting_agents) or 'none'}。\n"
+                + ("本轮适用业务 Skills：\n" + skill_context + "\n" if skill_context else "") +
                 f"客户当前问题知识库命中：{'是' if knowledge_hit else '否'}。\n"
                 "最近对话：\n" + history + "\n知识库：\n" + (context or "无可靠知识")
             )
@@ -2139,10 +2167,46 @@ def suggest_reply(conversation_id: int):
                 mode = "DeepSeek+知识库" if knowledge_hit else "DeepSeek情境回复"
             except (RuntimeError, KeyError, IndexError):
                 mode = "本地知识库（AI不可用）"
+
+    echomind_call = None
+    # Protected/high-risk messages never leave the deterministic SalesFlow gate.
+    if not protected_dialogue and not requires_human and ECHOMIND_CLIENT.enabled:
+        echomind_call = ECHOMIND_CLIENT.chat(
+            message=message,
+            user_id=f"lead:{conv['lead_id']}",
+            conv_id=f"salesflow:{conversation_id}",
+        )
+        if (
+            ECHOMIND_CLIENT.mode == "active"
+            and echomind_call.ok
+            and routing.risk == "low"
+            and routing.intent == "general_conversation"
+        ):
+            remote_reply = str((echomind_call.data or {}).get("response") or "").strip()
+            if external_reply_is_safe(remote_reply):
+                suggestion = remote_reply
+                mode = "EchoMind+SalesFlow安全校验"
+
     action = "暂停营销并转人工核查" if requires_human and protected_dialogue else ("可自动建议" if not requires_human else "人工确认后发送")
+    echomind_meta = {"mode": ECHOMIND_CLIENT.mode, "called": bool(echomind_call)}
+    if echomind_call:
+        echomind_meta["ok"] = echomind_call.ok
+        if echomind_call.ok:
+            remote = echomind_call.data or {}
+            echomind_meta.update({
+                "intent": remote.get("intent"),
+                "primary_agent": remote.get("primary_agent") or remote.get("agent_type"),
+                "supporting_agents": remote.get("supporting_agents") or [],
+                "routing_confidence": remote.get("routing_confidence"),
+                "latency_ms": remote.get("latency_ms"),
+            })
+        else:
+            echomind_meta["error"] = echomind_call.error
     return jsonify({"suggestion": suggestion, "risk": risk, "basis": mode, "sources": sources,
                     "decision_basis": decision_basis, "action": action,
-                    "requires_human": requires_human, "knowledge_hit": knowledge_hit})
+                    "requires_human": requires_human, "knowledge_hit": knowledge_hit,
+                    "routing": routing.to_dict(), "matched_skills": matched_skills,
+                    "echomind": echomind_meta})
 
 
 @app.get("/api/products")
@@ -2266,6 +2330,34 @@ def build_operations_suggestion(conversation_id: int) -> dict[str, Any] | None:
     if isinstance(response, tuple):
         return None
     return response.get_json()
+
+
+@app.get("/api/intelligence/status")
+def intelligence_status():
+    return jsonify({
+        "ok": True,
+        "local_orchestrator": "sales-multi-agent",
+        "agent_types": [
+            "lead_agent", "product_agent", "quotation_agent", "inventory_agent",
+            "order_agent", "fulfillment_agent", "after_sales_agent", "compliance_agent",
+        ],
+        "skills": [skill.name for skill in SALES_SKILLS.skills],
+        "skill_errors": SALES_SKILLS.errors,
+        "echomind": {
+            "mode": ECHOMIND_CLIENT.mode,
+            "configured": ECHOMIND_CLIENT.enabled,
+        },
+    })
+
+
+@app.post("/api/intelligence/skills/reload")
+def reload_intelligence_skills():
+    SALES_SKILLS.reload()
+    return jsonify({
+        "ok": not SALES_SKILLS.errors,
+        "skills": [skill.name for skill in SALES_SKILLS.skills],
+        "errors": SALES_SKILLS.errors,
+    })
 
 
 register_inventory_routes(app, db, now, audit)

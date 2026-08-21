@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+from datetime import date, timedelta
 from pathlib import Path
 
 import app as agent_app
@@ -35,10 +36,13 @@ class InventoryLifecycleTest(unittest.TestCase):
     def purchase_and_receive(self, quantity: float = 20) -> tuple[int, int]:
         supplier_id = self.create_supplier()
         warehouse_id = self.default_warehouse_id()
+        production_date = date.today()
+        expected_at = production_date + timedelta(days=3)
+        expiry_date = production_date + timedelta(days=30)
         created = self.client.post("/api/inventory/purchase-orders", json={
             "supplier_id": supplier_id,
             "warehouse_id": warehouse_id,
-            "expected_at": "2026-08-01",
+            "expected_at": expected_at.isoformat(),
             "notes": "产地直采测试",
             "items": [{"product_id": 1, "quantity": quantity, "unit_cost": 900}],
         })
@@ -51,8 +55,8 @@ class InventoryLifecycleTest(unittest.TestCase):
             "item_id": item["id"],
             "quantity": quantity,
             "batch_no": "MY-BATCH-001",
-            "production_date": "2026-07-25",
-            "expiry_date": "2026-08-05",
+            "production_date": production_date.isoformat(),
+            "expiry_date": expiry_date.isoformat(),
         })
         self.assertEqual(received.status_code, 201)
         return po_id, int(received.json["id"])
