@@ -192,7 +192,7 @@ durianflow-agent/
 ### 1. 下载代码
 
 ```powershell
-git clone https://github.com/liuluochen6-af/selfsale-agent.git
+git clone https://github.com/liuluochen6-af/Freshsales-Agent.git
 cd selfsale-agent
 ```
 
