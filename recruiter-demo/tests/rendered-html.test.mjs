@@ -17,8 +17,10 @@ test("server-renders the Freshsales-Agent recruiter demo", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
   assert.match(html, /<title>Freshsales-Agent/);
-  assert.match(html, /消息决策工作台/);
+  assert.match(html, /报价 Agent.*工作台/);
   assert.match(html, /8 个专职角色/);
+  assert.match(html, /真实公开数据/);
+  assert.match(html, /Bank of Thailand/);
   assert.match(html, /不连接真实客户系统/);
   assert.doesNotMatch(html, /DurianFlow|Your site is taking shape/);
 });
@@ -31,4 +33,6 @@ test("ships interactive routing and safety cases", async () => {
   assert.match(page, /退款.*赔偿/);
   assert.match(page, /blocked: true/);
   assert.match(page, /Freshsales-Agent Console/);
+  assert.match(page, /setSelectedAgent/);
+  assert.match(page, /下载 CSV/);
 });
