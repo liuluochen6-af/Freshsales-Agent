@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useMemo, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 
 type Risk = "低" | "中" | "高";
 type Decision = {
@@ -200,6 +200,8 @@ export default function Home() {
   const [runs, setRuns] = useState(12);
   const [status, setStatus] = useState("系统在线 · 等待任务");
   const [selectedAgent, setSelectedAgent] = useState("quotation");
+  const [selectedFeature, setSelectedFeature] = useState("routing");
+  const [hasScrolled, setHasScrolled] = useState(false);
   const [workspaceRows, setWorkspaceRows] = useState<
     Record<string, string[][]>
   >(() =>
@@ -214,6 +216,12 @@ export default function Home() {
   );
   const agentView = agentViews[selectedAgent];
   const currentRows = workspaceRows[selectedAgent] || [];
+  useEffect(() => {
+    const onScroll = () => setHasScrolled(window.scrollY > 34);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   function importCsv(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -252,7 +260,7 @@ export default function Home() {
 
   return (
     <main className="siteExperience">
-      <header className="nav shell">
+      <header className={hasScrolled ? "nav shell navScrolled" : "nav shell"}>
         <a className="logo" href="#top">
           <span>F</span>Freshsales-Agent
         </a>
@@ -383,7 +391,12 @@ export default function Home() {
           </p>
         </div>
         <div className="featureGrid">
-          <article className="feature large">
+            <article
+              className={selectedFeature === "routing" ? "feature large isSelected" : "feature large"}
+              onClick={() => setSelectedFeature("routing")}
+              tabIndex={0}
+              onKeyDown={(event) => event.key === "Enter" && setSelectedFeature("routing")}
+            >
             <div className="icon">⌁</div>
             <small>01 · INTELLIGENT ROUTING</small>
             <h3>一句话，自动拆解成执行计划</h3>
@@ -399,7 +412,12 @@ export default function Home() {
               <span className="accent">最合适 Agent</span>
             </div>
           </article>
-          <article className="feature">
+          <article
+            className={selectedFeature === "safety" ? "feature isSelected" : "feature"}
+            onClick={() => setSelectedFeature("safety")}
+            tabIndex={0}
+            onKeyDown={(event) => event.key === "Enter" && setSelectedFeature("safety")}
+          >
             <div className="icon">◎</div>
             <small>02 · HUMAN IN THE LOOP</small>
             <h3>高风险动作不越权</h3>
@@ -409,7 +427,12 @@ export default function Home() {
               <b>高</b>
             </div>
           </article>
-          <article className="feature">
+          <article
+            className={selectedFeature === "audit" ? "feature isSelected" : "feature"}
+            onClick={() => setSelectedFeature("audit")}
+            tabIndex={0}
+            onKeyDown={(event) => event.key === "Enter" && setSelectedFeature("audit")}
+          >
             <div className="icon">↗</div>
             <small>03 · OBSERVABLE</small>
             <h3>每个决定都有理由</h3>
