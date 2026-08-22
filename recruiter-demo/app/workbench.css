@@ -7,7 +7,7 @@
   cursor: pointer;
 }
 .agentRail button.agent:hover {
-  background: #f1effc;
+  background: #eaf8ef;
   color: var(--purple);
 }
 .agentRail button.agent.active {
@@ -32,7 +32,7 @@
 }
 .datasetHead > div:first-child > span {
   display: inline-block;
-  background: #eeebff;
+  background: #e5f6ea;
   color: var(--purple);
   border-radius: 99px;
   padding: 5px 8px;
@@ -58,7 +58,7 @@
   font-size: 8px;
   font-weight: 750;
   color: var(--purple);
-  border: 1px solid #dcd6fb;
+  border: 1px solid #bfe8ca;
   background: #fff;
   padding: 7px 9px;
   border-radius: 7px;
