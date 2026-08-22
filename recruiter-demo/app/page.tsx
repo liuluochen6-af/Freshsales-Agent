@@ -198,6 +198,7 @@ export default function Home() {
   );
   const [pending, setPending] = useState(false);
   const [runs, setRuns] = useState(12);
+  const [status, setStatus] = useState("系统在线 · 等待任务");
   const [selectedAgent, setSelectedAgent] = useState("quotation");
   const [workspaceRows, setWorkspaceRows] = useState<
     Record<string, string[][]>
@@ -229,6 +230,7 @@ export default function Home() {
         .filter((row) => row.length >= agentView.columns.length)
         .map((row) => row.slice(0, agentView.columns.length));
       setWorkspaceRows((state) => ({ ...state, [selectedAgent]: parsed }));
+      setStatus(`已导入 ${parsed.length} 行数据 · ${agents[selectedAgent]}`);
     };
     reader.readAsText(file);
     event.target.value = "";
@@ -237,11 +239,13 @@ export default function Home() {
     if (!next.trim()) return;
     setMessage(next);
     setPending(true);
+    setStatus("Router 正在识别意图 · 提取实体 · 评估风险");
     window.setTimeout(() => {
       const routed = routeMessage(next);
       setDecision(routed);
       setSelectedAgent(routed.primary);
       setRuns((n) => n + 1);
+      setStatus(`路由完成 · ${agents[routed.primary]} 已生成建议`);
       setPending(false);
     }, 420);
   }
@@ -443,7 +447,7 @@ export default function Home() {
                   <button
                     type="button"
                     key={key}
-                    onClick={() => setSelectedAgent(key)}
+                    onClick={() => { setSelectedAgent(key); setStatus(`已切换到 ${label} · 数据工作区已更新`); }}
                     className={selectedAgent === key ? "agent active" : "agent"}
                     aria-pressed={selectedAgent === key}
                   >
@@ -459,7 +463,7 @@ export default function Home() {
                     <small>AGENT DATA WORKSPACE</small>
                     <h3>{agents[selectedAgent]}工作台</h3>
                   </div>
-                  <span>已运行 {runs} 次</span>
+                  <span className="consoleStatus"><i />{status} · 已运行 {runs} 次</span>
                 </div>
                 <label className="agentSelect">
                   <span>选择 Agent</span>
