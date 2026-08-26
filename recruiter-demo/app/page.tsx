@@ -389,6 +389,19 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <section className="storyVideo shell" id="story">
+        <div className="storyCopy">
+          <span className="storyKicker">03 · 产品介绍</span>
+          <h2>不只看介绍，<br /><em>亲手试一次。</em></h2>
+          <p>用 40 秒了解 Freshsales-Agent 如何把线索、会话、报价、库存、订单、履约与合规串成一条可追踪的销售链路。</p>
+          <a className="storyButton" href="/app">打开运营控制台 <span>→</span></a>
+        </div>
+        <div className="storyVideoFrame">
+          <div className="storyVideoChrome"><div className="storyVideoBrand"><span className="miniLogo">F</span> Freshsales-Agent</div><span className="storyVideoStatus"><i /> 普通话介绍 · 00:39</span></div>
+          <video className="storyVideoPlayer" controls preload="metadata" src="/freshsales-agent-40s.mp4" aria-label="Freshsales-Agent 中文普通话产品介绍" />
+          <div className="storyVideoFooter"><span>00:39 · 产品链路介绍</span><span>播放完整流程 ↗</span></div>
+        </div>
+      </section>
       <section className="features shell" id="features">
         <div className="sectionIntro">
           <span>核心能力</span>
