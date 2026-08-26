@@ -202,6 +202,7 @@ export default function Home() {
   const [selectedAgent, setSelectedAgent] = useState("quotation");
   const [selectedFeature, setSelectedFeature] = useState("routing");
   const [hasScrolled, setHasScrolled] = useState(false);
+  const [statusPulse, setStatusPulse] = useState(false);
   const [workspaceRows, setWorkspaceRows] = useState<
     Record<string, string[][]>
   >(() =>
@@ -257,6 +258,14 @@ export default function Home() {
       setPending(false);
     }, 420);
   }
+  function checkSystemStatus() {
+    setStatusPulse(true);
+    setStatus("正在检查连接 · Router / Agents / 数据源");
+    window.setTimeout(() => {
+      setStatusPulse(false);
+      setStatus("系统在线 · 所有服务运行正常");
+    }, 900);
+  }
 
   return (
     <main className="siteExperience">
@@ -269,6 +278,9 @@ export default function Home() {
           <a href="#workspace">运营控制台</a>
           <a href="#architecture">架构</a>
         </nav>
+        <button className={statusPulse ? "systemStatus checking" : "systemStatus"} type="button" onClick={checkSystemStatus} aria-live="polite">
+          <i />{statusPulse ? "检查中…" : "系统在线"}<b>⌄</b>
+        </button>
         <a className="navButton" href="/app">
           Start <b>↗</b>
         </a>
