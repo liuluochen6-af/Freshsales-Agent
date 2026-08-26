@@ -3,7 +3,7 @@
 > 面向榴莲及生鲜批发业务的本地化销售运营智能体：从门店线索、微信触达、知识库问答，到报价、采购、库存、订单和发货的一体化开源工作台。
 
 
-**Web 系统demo：** [Freshsales-Agent](https://freshsales-agent.liuluochen6.chatgpt.site)  
+**Web 系统demo：** [Freshsales-Agent](https://freshsales.liuluochen.asia/)  
 支持公开市场数据、企业 CSV 导入，以及报价、库存、履约、售后与合规 Agent 路由。
 
 Freshsales-Agent 不是一个只会生成销售话术的聊天机器人。它把线索管理、Windows 微信 RPA、可追溯知识库、DeepSeek 语言组织、销售订单、批次库存和发货控制放在同一套本地系统中，目标是让小型供应链团队能够看清每个客户、每条消息、每次报价和每一笔库存变化。
