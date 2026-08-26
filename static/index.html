@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Freshsales-Agent</title>
+  <title>榴莲销售运营智能体</title>
   <link rel="stylesheet" href="/static/styles.css?v=20260719-provenance-training">
 </head>
 <body>
   <aside class="sidebar">
     <div class="brand">
       <div class="brand-mark">榴</div>
-      <div><strong>Freshsales-Agent</strong><small>Sales Operations Agent</small></div>
+      <div><strong>榴莲销售智能体</strong><small>Sales Operations Agent</small></div>
     </div>
     <nav id="nav">
       <button class="nav-item active" data-page="dashboard"><span>⌂</span>经营总览</button>
@@ -30,7 +30,7 @@
   <main class="main">
     <header class="topbar">
       <div><p class="eyebrow">榴莲 B2B 私域运营</p><h1 id="page-title">经营总览</h1></div>
-      <div class="top-actions"><span id="clock"></span><button class="icon-button" onclick="refreshCurrent()">↻</button><div class="avatar">管</div></div>
+      <div class="top-actions"><button id="system-status" class="status-pill online" type="button" aria-live="polite" onclick="toggleSystemStatus()"><i></i><span>系统在线</span><b>⌄</b></button><span id="clock"></span><button class="icon-button" onclick="refreshCurrent()" aria-label="刷新当前页面">↻</button><div class="avatar" title="管理员账户">管</div></div>
     </header>
 
     <section id="page-dashboard" class="page active">
